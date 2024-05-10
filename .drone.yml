@@ -23,7 +23,7 @@ steps:
         - mkdir -p /app/build/ruoyi-mall && cp -R ./run.sh /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./ry.sh /app/build/ruoyi-mall/
     - name: 部署
-      script
+      script:
         - cd /app/build/ruoyi-mall
         - chmod +x ry.sh
         - chmod +x run.sh
