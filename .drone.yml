@@ -9,15 +9,15 @@ volumes:
     host:
       path: /volume2/docker/drone/server-01/drone-runner-docker/apps/java/run-script
 steps:
-   - name: 构建
-     image: openjdk:11-jre-slim
-     pull: if-not-exists
-     volumes:
-      - name: maven-cache
-        path: /root/.m2
-      - name: run-script
-        path: /app/build
-     commands:
+    - name: 构建
+      image: openjdk:11-jre-slim
+      pull: if-not-exists
+      volumes:
+        - name: maven-cache
+          path: /root/.m2
+        - name: run-script
+          path: /app/build
+      commands:
         - mvn clean install
         - mkdir -p /app/build/ruoyi-mall && cp -R ./target/*.jar /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./run.sh /app/build/ruoyi-mall/
