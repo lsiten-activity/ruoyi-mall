@@ -22,14 +22,12 @@ steps:
         - mkdir -p /app/build/ruoyi-mall && cp -R ./target/*.jar /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./run.sh /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./ry.sh /app/build/ruoyi-mall/
-
     - name: 部署
       script
         - cd /app/build/ruoyi-mall
         - chmod +x ry.sh
         - chmod +x run.sh
         - ./run.sh
-
     - name: 构建通知
       image: plugins/webhooks:latest
       pull: if-not-exists
