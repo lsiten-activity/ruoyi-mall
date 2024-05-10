@@ -38,15 +38,14 @@ steps:
           {
             "msgtype": "markdown",
             "markdown": {
-              "content": ```
-                          {{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**
-                          >**构建结果**: {{build.status}}
-                          >**构建详情**: [点击查看]({{build.link}})
-                          >**代码分支**: {{build.branch}}
-                          >**提交标识**: {{build.commit}}
-                          >**提交发起**: {{build.author}}
-                          >**提交信息**: {{build.message}}
-                        ```
+              "content":｜
+                {{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**
+                >**构建结果**: {{build.status}}
+                >**构建详情**: [点击查看]({{build.link}})
+                >**代码分支**: {{build.branch}}
+                >**提交标识**: {{build.commit}}
+                >**提交发起**: {{build.author}}
+                >**提交信息**: {{build.message}}
             }
           }
 trigger:
