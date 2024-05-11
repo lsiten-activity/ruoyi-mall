@@ -18,6 +18,7 @@ steps:
         - name: run-script
           path: /app/build
       commands:
+        - pwd
         - mvn clean install
         - mkdir -p /app/build/ruoyi-mall && cp -R ./target/*.jar /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./run.sh /app/build/ruoyi-mall/
