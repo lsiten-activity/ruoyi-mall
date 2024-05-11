@@ -39,7 +39,7 @@ gen:
   # 路径
   path:
     # 后端根目录
-    backPath: D:\workspace\RuoYi-Mall\
+    backPath: /drone/src
     # 后端 service 模块名
     serviceModule: ruoyi-mall
     # 后端 api 模块名, 默认与 service 一致
