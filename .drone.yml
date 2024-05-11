@@ -29,11 +29,12 @@ steps:
       commands:
         - pwd
         - mvn clean install
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && rm -rf /app/build/${DRONE_REPO_NAME}/*
         - mkdir -p /app/build/${DRONE_REPO_NAME} && find . -type f -name "*.jar" -path "*/target/*" -exec cp {} /app/build/${DRONE_REPO_NAME} \;
         - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./run.sh /app/build/${DRONE_REPO_NAME}/
         - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./ry.sh /app/build/${DRONE_REPO_NAME}/
         - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./Dockerfile /app/build/${DRONE_REPO_NAME}/
-        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./docker.sh /app/build/${DRONE_REPO_NAME}/
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./run-docker.sh /app/build/${DRONE_REPO_NAME}/
     - name: 部署
       image: plugins/docker
       volumes:
@@ -46,8 +47,8 @@ steps:
       commands:
         - cd /app/build/${DRONE_REPO_NAME}/
         - ls -al /app/build/${DRONE_REPO_NAME}/
-        - chmod +x docker.sh
-        - ./docker.sh
+        - chmod +x run-docker.sh
+        - ./run-docker.sh
         - docker ps
     - name: 构建通知
       image: plugins/webhook
