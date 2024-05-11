@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # 设置默认值为 "test" 的仓库名
 DRONE_REPO_NAME="${DRONE_REPO_NAME:-test}"
