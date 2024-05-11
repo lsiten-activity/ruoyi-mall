@@ -34,7 +34,7 @@ steps:
         - chmod +x run.sh
         - ./run.sh
     - name: 构建通知
-      image: plugins/webhooks:latest
+      image: plugins/webhook
       pull: if-not-exists
       settings:
         urls: https://oapi.dingtalk.com/robot/send?access_token=d23bb0bb02a1253f5fa8e5be917fb8f0798580df63dcf83f6a97ef08b9fee3e5
