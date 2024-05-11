@@ -31,10 +31,8 @@ steps:
         - mvn clean install
         - mkdir -p /app/build/${DRONE_REPO_NAME} && rm -rf /app/build/${DRONE_REPO_NAME}/*
         - mkdir -p /app/build/${DRONE_REPO_NAME} && find . -type f -name "*.jar" -path "*/target/*" -exec cp {} /app/build/${DRONE_REPO_NAME} \;
-        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./run.sh /app/build/${DRONE_REPO_NAME}/
-        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./ry.sh /app/build/${DRONE_REPO_NAME}/
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./*.sh /app/build/${DRONE_REPO_NAME}/
         - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./Dockerfile /app/build/${DRONE_REPO_NAME}/
-        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./run-docker.sh /app/build/${DRONE_REPO_NAME}/
     - name: 部署
       image: plugins/docker
       volumes:
