@@ -10,7 +10,7 @@ volumes:
       path: /volume2/docker/drone/server-01/drone-runner-docker/apps/java/run-script
 steps:
     - name: 构建
-      image: maven:3.8-openjdk-11
+      image: maven:3.8-openjdk-8
       pull: if-not-exists
       volumes:
         - name: maven-cache
