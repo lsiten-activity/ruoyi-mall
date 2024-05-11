@@ -22,8 +22,8 @@ if [ "$AppName" = "" ]; then
 fi
 
 start() {
-    nohup java -jar $JVM_OPTS target/$AppName > /dev/null 2>&1 &
     echo "Start $AppName success..."
+    java -jar $JVM_OPTS target/$AppName > /dev/null 2>&1
 }
 
 stop() {
