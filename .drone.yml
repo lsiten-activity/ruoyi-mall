@@ -46,7 +46,7 @@ steps:
         - cd /app/build/${DRONE_REPO_NAME}/
         - ls -al /app/build/${DRONE_REPO_NAME}/
         - chmod +x run-docker.sh
-        - ./run-docker.sh
+        - /app/build/${DRONE_REPO_NAME}/run-docker.sh
         - docker ps
     - name: 构建通知
       image: plugins/webhook
