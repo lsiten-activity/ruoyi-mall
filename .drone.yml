@@ -8,6 +8,10 @@ volumes:
   - name: run-script
     host:
       path: /volume2/docker/drone/server-01/drone-runner-docker/apps/java/run-script
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
 steps:
     - name: 构建
       image: maven:3.8-openjdk-11
@@ -20,22 +24,25 @@ steps:
       commands:
         - pwd
         - mvn clean install
-        - mkdir -p /app/build/ruoyi-mall && find . -type f -name "*.jar" -path "*/target/*" -exec cp {} /app/build/ruoyi-mall \;
-        - mkdir -p /app/build/ruoyi-mall && cp -R ./run.sh /app/build/ruoyi-mall/
-        - mkdir -p /app/build/ruoyi-mall && cp -R ./ry.sh /app/build/ruoyi-mall/
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && find . -type f -name "*.jar" -path "*/target/*" -exec cp {} /app/build/${DRONE_REPO_NAME} \;
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./run.sh /app/build/${DRONE_REPO_NAME}/
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./ry.sh /app/build/${DRONE_REPO_NAME}/
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./Dockerfile /app/build/${DRONE_REPO_NAME}/
     - name: 部署
-      image: openjdk:11.0.11-jdk-slim
-      pull: if-not-exists
+      image: plugins/docker
       volumes:
         - name: run-script
           path: /app/build
+        - name: docker
+          path: /var/run/docker.sock # 挂载宿主机的docker
+      settings:
+        dockerfile: /app/build/${DRONE_REPO_NAME}/Dockerfile
       commands:
-        - pwd
-        - cd /app/build/ruoyi-mall
-        - ls -al /app/build/ruoyi-mall
-        - chmod +x ry.sh
-        - chmod +x run.sh
-        - ./run.sh
+        - cd /app/build/${DRONE_REPO_NAME}/
+        - ls -al /app/build/${DRONE_REPO_NAME}/
+        - chmod +x docker.sh
+        - ./docker.sh
+        - docker ps
     - name: 构建通知
       image: plugins/webhook
       pull: if-not-exists
@@ -47,13 +54,13 @@ steps:
             "msgtype": "markdown",
             "markdown": {
               "title": "构建通知",
-              "text": "{{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**
-                >**构建结果**: {{build.status}}
-                >**构建详情**: [点击查看]({{build.link}})
-                >**代码分支**: {{build.branch}}
-                >**提交标识**: {{build.commit}}
-                >**提交发起**: {{build.author}}
-                >**提交信息**: {{build.message}}"
+              "text": "{{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**\n
+> **构建结果**: {{build.status}}\n
+> **构建详情**: [点击查看]({{build.link}})\n
+> **代码分支**: {{build.branch}}\n
+> **提交标识**: {{build.commit}}\n
+> **提交发起**: {{build.author}}\n
+> **提交信息**: {{build.message}}"
             }
           }
 trigger:
