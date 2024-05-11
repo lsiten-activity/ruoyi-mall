@@ -35,7 +35,7 @@ docker build -t ${group_name}/${app_name}:${app_version} .
 echo "----build image----"
 
 # 获取端口号，默认为 9090
-port=${DRONE_RUNNER_PORT:-9090}
+port=${APP_PORT:-9090}
 
 # 运行容器
 docker run -p ${port}:9090 --name ${app_name} \
