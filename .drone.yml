@@ -30,7 +30,9 @@ steps:
         - name: run-script
           path: /app/build
       script:
+        - pwd
         - cd /app/build/ruoyi-mall
+        - ls -al /app/build/ruoyi-mall
         - chmod +x ry.sh
         - chmod +x run.sh
         - ./run.sh
