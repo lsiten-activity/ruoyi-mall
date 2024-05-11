@@ -10,7 +10,7 @@ volumes:
       path: /volume2/docker/drone/server-01/drone-runner-docker/apps/java/run-script
 steps:
     - name: 构建
-      image: openjdk:latest
+      image: maven:3.8-openjdk-11
       pull: if-not-exists
       volumes:
         - name: maven-cache
@@ -22,6 +22,36 @@ steps:
         - mkdir -p /app/build/ruoyi-mall && cp -R ./target/*.jar /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./run.sh /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./ry.sh /app/build/ruoyi-mall/
+    - name: 部署
+      image: openjdk:11.0.11-jdk-slim
+      pull: if-not-exists
+      volumes:
+        - name: run-script
+          path: /app/build
+      script:
+        - cd /app/build/ruoyi-mall
+        - chmod +x ry.sh
+        - chmod +x run.sh
+        - ./run.sh
+    - name: 构建通知
+      image: plugins/webhooks:latest
+      pull: if-not-exists
+      settings:
+        urls: https://oapi.dingtalk.com/robot/send?access_token=d23bb0bb02a1253f5fa8e5be917fb8f0798580df63dcf83f6a97ef08b9fee3e5
+        content_type: application/json
+        template:
+          {
+            "msgtype": "markdown",
+            "markdown": {
+              "content": "{{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**
+                >**构建结果**: {{build.status}}
+                >**构建详情**: [点击查看]({{build.link}})
+                >**代码分支**: {{build.branch}}
+                >**提交标识**: {{build.commit}}
+                >**提交发起**: {{build.author}}
+                >**提交信息**: {{build.message}}"
+            }
+          }
 trigger:
   branch:
     - master
