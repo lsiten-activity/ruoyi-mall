@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # author ruoyi
 # ./ry.sh start 启动
 # ./ry.sh stop 停止
@@ -22,14 +22,8 @@ if [ "$AppName" = "" ]; then
 fi
 
 start() {
-    PID=$(ps -ef | grep java | grep $AppName | grep -v grep | awk '{print $2}')
-
-    if [ x"$PID" != x"" ]; then
-        echo "$AppName is running..."
-    else
-        nohup java -jar $JVM_OPTS target/$AppName > /dev/null 2>&1 &
-        echo "Start $AppName success..."
-    fi
+    nohup java -jar $JVM_OPTS target/$AppName > /dev/null 2>&1 &
+    echo "Start $AppName success..."
 }
 
 stop() {
