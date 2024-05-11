@@ -27,36 +27,35 @@ function start()
 {
     PID=`ps -ef |grep java|grep $AppName|grep -v grep|awk '{print $2}'`
 
-	if [ x"$PID" != x"" ]; then
-	    echo "$AppName is running..."
-	else
-		nohup java -jar  $JVM_OPTS target/$AppName > /dev/null 2>&1 &
-		echo "Start $AppName success..."
-	fi
+    if [ x"$PID" != x"" ]; then
+        echo "$AppName is running..."
+    else
+        nohup java -jar  $JVM_OPTS target/$AppName > /dev/null 2>&1 &
+        echo "Start $AppName success..."
+    fi
 }
 
 function stop()
 {
     echo "Stop $AppName"
-	
-	PID=""
-	query(){
-		PID=`ps -ef |grep java|grep $AppName|grep -v grep|awk '{print $2}'`
-	}
+    PID=""
+    query(){
+        PID=`ps -ef |grep java|grep $AppName|grep -v grep|awk '{print $2}'`
+    }
 
-	query
-	if [ x"$PID" != x"" ]; then
-		kill -TERM $PID
-		echo "$AppName (pid:$PID) exiting..."
-		while [ x"$PID" != x"" ]
-		do
-			sleep 1
-			query
-		done
-		echo "$AppName exited."
-	else
-		echo "$AppName already stopped."
-	fi
+    query
+    if [ x"$PID" != x"" ]; then
+        kill -TERM $PID
+        echo "$AppName (pid:$PID) exiting..."
+        while [ x"$PID" != x"" ]
+        do
+            sleep 1
+            query
+        done
+        echo "$AppName exited."
+    else
+        echo "$AppName already stopped."
+    fi
 }
 
 function restart()
@@ -86,5 +85,7 @@ case $1 in
     status)
     status;;
     *)
-
+    echo -e "\033[0;31m Invalid command: $1 \033[0m"
+    echo -e "\033[0;34m Usage: $0 {start|stop|restart|status} \033[0m"
+    exit 1
 esac
