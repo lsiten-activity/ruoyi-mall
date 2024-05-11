@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # author ruoyi
 # ./ry.sh start 启动
 # ./ry.sh stop 停止
