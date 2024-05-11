@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./ry.sh start###
+./ry.sh start
