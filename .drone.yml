@@ -20,7 +20,7 @@ steps:
       commands:
         - pwd
         - mvn clean install
-        - mkdir -p /app/build/ruoyi-mall && cp -R ./target/*.jar /app/build/ruoyi-mall/
+        - mkdir -p /app/build/ruoyi-mall && find . -type f -name "*.jar" -path "*/target/*" -exec cp {} /app/build/ruoyi-mall \;
         - mkdir -p /app/build/ruoyi-mall && cp -R ./run.sh /app/build/ruoyi-mall/
         - mkdir -p /app/build/ruoyi-mall && cp -R ./ry.sh /app/build/ruoyi-mall/
     - name: 部署
