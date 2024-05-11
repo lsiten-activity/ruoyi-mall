@@ -46,7 +46,8 @@ steps:
           {
             "msgtype": "markdown",
             "markdown": {
-              "content": "{{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**
+              "title": "构建通知",
+              "text": "{{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**
                 >**构建结果**: {{build.status}}
                 >**构建详情**: [点击查看]({{build.link}})
                 >**代码分支**: {{build.branch}}
