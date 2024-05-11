@@ -7,8 +7,7 @@ RUN mkdir -p /app/
 # 工作区
 WORKDIR /app
 # 复制操作
-COPY ./start.sh /app/
-COPY ./ry.sh /app/
+COPY ./*.sh /app/
 #将宿主机当前目录下的 *.jar 文件复制到容器的 /app/ 目录下
 COPY ./*.jar /app/
 #对 /app/ 目录及其子目录下的所有文件赋予可执行权限
