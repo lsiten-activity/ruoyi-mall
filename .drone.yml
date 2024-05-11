@@ -60,11 +60,11 @@ steps:
             "markdown": {
               "title": "构建通知",
               "text": "{{#success build.status}}{{else}}{{/success}}**{{repo.owner}}/{{repo.name}}**\n
-> **构建结果**: {{build.status}}\n
-> **构建详情**: [点击查看]({{build.link}})\n
-> **代码分支**: {{build.branch}}\n
-> **提交标识**: {{build.commit}}\n
-> **提交发起**: {{build.author}}\n
+> **构建结果**: {{build.status}}\n\n
+> **构建详情**: [点击查看]({{build.link}})\n\n
+> **代码分支**: {{build.branch}}\n\n
+> **提交标识**: {{build.commit}}\n\n
+> **提交发起**: {{build.author}}\n\n
 > **提交信息**: {{build.message}}"
             }
           }

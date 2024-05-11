@@ -20,6 +20,3 @@ RUN chmod 755 -R /app/
 
 # 设置容器的入口点为 /app/run.sh，即在容器启动时执行该脚本
 ENTRYPOINT ["/app/run.sh"]
-
-# 可选：提供默认参数
-CMD ["--server.port=${SERVICE_PORT}"]
