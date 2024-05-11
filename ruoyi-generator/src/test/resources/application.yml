@@ -5,9 +5,9 @@ spring:
     #    schema: classpath*:sql/init.sql
     #    data: classpath:sql/data.sql
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://rm-wz987gwxg397qojlao.mysql.rds.aliyuncs.com:3638/ry_mall?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&allowMultiQueries=true
-    username: mall_cyl
-    password: asdfpCC_sodpfjoDD_piuPOi
+    url: jdbc:mysql://192.168.31.127:3306/ry?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&allowMultiQueries=true
+    username: remote
+    password: 5DtY!kMnK$r7YNs$CZ3d77*X&k
   jpa:
     properties:
       hibernate:
