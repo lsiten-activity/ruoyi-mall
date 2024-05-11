@@ -12,5 +12,5 @@ COPY ./*.sh /app/
 COPY ./*.jar /app/
 #对 /app/ 目录及其子目录下的所有文件赋予可执行权限
 RUN chmod 755 -R /app/
-#设置容器的入口点为 /app/start.sh，即在容器启动时执行该脚本
-ENTRYPOINT ["/app/start.sh"]
+#设置容器的入口点为 /app/run.sh，即在容器启动时执行该脚本
+ENTRYPOINT ["/app/run.sh"]
