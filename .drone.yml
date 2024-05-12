@@ -1,6 +1,6 @@
 kind: pipeline
 type: docker
-name: default
+name: spring boot项目部署
 
 # 定义全局环境变量
 environment:
