@@ -1,5 +1,5 @@
 # 指定了基础镜像为 openjdk:11.0.11-jdk-slim，即使用了 OpenJDK 11
-FROM openjdk:11.0.11-jdk-slim
+FROM openjdk:11.0.11
 
 # 设置了一个名为 SERVICE_PORT 的环境变量，并将其值设为 9090
 ENV SERVICE_PORT=9090
