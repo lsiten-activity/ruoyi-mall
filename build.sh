@@ -2,7 +2,7 @@
 
 dist_dir="dist"
 
-app_name="ruoyi-admin.jar"
+app_name="ruoyi-admin"
 
 version="1.0.0"
 
@@ -23,7 +23,7 @@ fi
 rm -rf $target_dir/*
 
 # 复制服务端资源
-cp -r ruoyi-admin/target/zyplayer-doc.jar $target_dir
+cp -r ruoyi-admin/target/${app_name}.jar $target_dir
 cp -r ruoyi-admin/src/main/resources/*.yml $target_dir
 cp -r ./startup.sh ./run-docker.sh $target_dir
 
