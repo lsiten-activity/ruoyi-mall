@@ -28,10 +28,12 @@ steps:
           path: /app/build
       commands:
         - pwd
-        - mvn clean install
+        - chmod +x build.sh
+        - ./build.sh
         - mkdir -p /app/build/${DRONE_REPO_NAME} && rm -rf /app/build/${DRONE_REPO_NAME}/*
-        - mkdir -p /app/build/${DRONE_REPO_NAME} && find . -type f -name "*.jar" -path "*/target/*" -exec cp {} /app/build/${DRONE_REPO_NAME} \;
-        - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./*.sh /app/build/${DRONE_REPO_NAME}/
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && find ./dist -type f -name "*.jar" -path "**/*" -exec cp {} /app/build/${DRONE_REPO_NAME} \;
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && find ./dist -type f -name "*.yml" -path "**/*" -exec cp {} /app/build/${DRONE_REPO_NAME} \;
+        - mkdir -p /app/build/${DRONE_REPO_NAME} && find ./dist -type f -name "*.sh" -path "**/*" -exec cp {} /app/build/${DRONE_REPO_NAME} \;
         - mkdir -p /app/build/${DRONE_REPO_NAME} && cp -R ./Dockerfile /app/build/${DRONE_REPO_NAME}/
     - name: 部署
       image: plugins/docker

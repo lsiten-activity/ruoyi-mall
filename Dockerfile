@@ -19,4 +19,4 @@ COPY *.jar /app/
 RUN chmod 755 -R /app/
 
 # 设置容器的入口点为 /app/run.sh，即在容器启动时执行该脚本
-ENTRYPOINT ["/app/run.sh"]
+ENTRYPOINT ["/app/startup.sh"]
