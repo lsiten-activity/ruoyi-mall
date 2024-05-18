@@ -1,6 +1,6 @@
 #!/bin/sh
 
-AppName=ruoyi-admin.jar
+AppName="${DRONE_REPO_NAME:-test}.jar"
 
 # JVM参数
 JVM_OPTS="-Dname=$AppName  -Duser.timezone=Asia/Shanghai -Xms512M -Xmx1024M"
