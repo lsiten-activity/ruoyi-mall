@@ -2,7 +2,7 @@
 
 dist_dir="dist"
 
-app_name="ruoyi-admin"
+app_name="${DRONE_REPO_NAME:-test}"
 
 version="1.0.0"
 
@@ -25,6 +25,5 @@ rm -rf $target_dir/*
 # 复制服务端资源
 cp -r ruoyi-admin/target/${app_name}.jar $target_dir
 cp -r ruoyi-admin/src/main/resources/*.yml $target_dir
-cp -r ./startup.sh ./run-docker.sh $target_dir
 
 echo "服务端构建完毕，构建结果在${target_dir}文件夹下"
