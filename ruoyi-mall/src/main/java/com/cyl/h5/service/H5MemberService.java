@@ -1,6 +1,15 @@
 package com.cyl.h5.service;
 
-import cn.hutool.json.JSONUtil;
+import java.time.LocalDateTime;
+import java.util.Base64;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -27,22 +36,19 @@ import com.cyl.wechat.response.WechatUserAuth;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.domain.model.LoginMember;
 import com.ruoyi.common.core.redis.RedisCache;
-import com.ruoyi.common.utils.*;
+import com.ruoyi.common.utils.AesCryptoUtils;
+import com.ruoyi.common.utils.PhoneUtils;
+import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.utils.ServletUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.ip.AddressUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.config.LocalDataUtil;
 import com.ruoyi.framework.web.service.TokenService;
+
+import cn.hutool.json.JSONUtil;
 import eu.bitwalker.useragentutils.UserAgent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Base64Utils;
-
-import java.time.LocalDateTime;
-import java.util.Base64;
 
 @Service
 @Slf4j
@@ -72,36 +78,36 @@ public class H5MemberService {
     @Autowired
     private MemberLogininforMapper memberLogininforMapper;
 
-
     /**
      * 注册
+     * 
      * @param request 注册请求体
      * @return 结果
      */
     @Transactional
-    public RegisterVO register(RegisterForm request){
+    public RegisterVO register(RegisterForm request) {
         LocalDateTime optDate = LocalDateTime.now();
         RegisterVO response = new RegisterVO();
-        //校验验证码
+        // 校验验证码
         this.validateVerifyCode(request.getUuid(), request.getMobile(), request.getCode());
-        //创建会员
+        // 创建会员
         Member member = new Member();
         member.setPhoneEncrypted(AesCryptoUtils.encrypt(aesKey, request.getMobile()));
         member.setPhoneHidden(PhoneUtils.hidePhone(request.getMobile()));
         member.setPassword(SecurityUtils.encryptPassword(request.getPassword()));
-        member.setNickname("用户" + request.getMobile().substring(7,11));
+        member.setNickname("用户" + request.getMobile().substring(7, 11));
         member.setStatus(Constants.MEMBER_ACCOUNT_STATUS.NORMAL);
         member.setGender(0);
         member.setCreateTime(optDate);
-       int rows = memberMapper.insert(member);
-       if (rows < 1){
-           throw new RuntimeException("注册失败，请重试");
-       }
-       //调用微信授权业务拿到openId等
+        int rows = memberMapper.insert(member);
+        if (rows < 1) {
+            throw new RuntimeException("注册失败，请重试");
+        }
+        // 调用微信授权业务拿到openId等
         WechatUserAuth userToken = wechatAuthService.getUserToken(request.getWechatCode());
-       if (userToken == null){
-           throw new RuntimeException("授权失败，请重试");
-       }
+        if (userToken == null) {
+            throw new RuntimeException("授权失败，请重试");
+        }
         MemberWechat memberWechat = new MemberWechat();
         memberWechat.setMemberId(member.getId());
         memberWechat.setOpenid(userToken.getOpenid());
@@ -111,10 +117,10 @@ public class H5MemberService {
         memberWechat.setCreateTime(optDate);
         memberWechat.setCreateBy(member.getId());
         rows = memberWechatMapper.insert(memberWechat);
-        if (rows < 1){
+        if (rows < 1) {
             throw new RuntimeException("注册失败，请重试");
         }
-        //注册成功直接返回token了
+        // 注册成功直接返回token了
         H5LoginVO loginResponse = getLoginResponse(member.getId());
         response.setToken(loginResponse.getToken());
         return response;
@@ -127,7 +133,7 @@ public class H5MemberService {
         QueryWrapper<Member> qw = new QueryWrapper<>();
         qw.eq("phone_encrypted", AesCryptoUtils.encrypt(aesKey, phone));
         Member member = memberMapper.selectOne(qw);
-        if (member != null){
+        if (member != null) {
             throw new RuntimeException("该手机号已被占用");
         }
         response.setIfSuccess(true);
@@ -137,82 +143,85 @@ public class H5MemberService {
 
     /**
      * 账号密码登录
+     * 
      * @param data
      * @return
      */
     public H5LoginVO accountLogin(String data) {
-        if (StringUtils.isEmpty(data)){
+        if (StringUtils.isEmpty(data)) {
             throw new RuntimeException(Constants.LOGIN_INFO.WRONG);
         }
         // 解码 转 对象
-        H5AccountLoginForm request = JSON.parseObject(new String(Base64Utils.decodeFromString(data)), H5AccountLoginForm.class);
+        H5AccountLoginForm request = JSON.parseObject(new String(Base64Utils.decodeFromString(data)),
+                H5AccountLoginForm.class);
         log.info("account login request:{}", JSONUtil.toJsonStr(request));
         QueryWrapper<Member> qw = new QueryWrapper<>();
         qw.eq("phone_encrypted", AesCryptoUtils.encrypt(aesKey, request.getMobile()));
         Member member = memberMapper.selectOne(qw);
-        if (member == null){
+        if (member == null) {
             throw new RuntimeException(Constants.LOGIN_INFO.WRONG);
         }
         validateMemberStatus(member);
-        //check 密码
-        if (!SecurityUtils.matchesPassword(request.getPassword(), member.getPassword())){
+        // check 密码
+        if (!SecurityUtils.matchesPassword(request.getPassword(), member.getPassword())) {
             throw new RuntimeException(Constants.LOGIN_INFO.WRONG);
         }
         return getLoginResponse(member.getId());
     }
 
-    public H5LoginVO smsLogin(String data){
+    public H5LoginVO smsLogin(String data) {
         LocalDateTime optDate = LocalDateTime.now();
-        if (StringUtils.isEmpty(data)){
+        if (StringUtils.isEmpty(data)) {
             throw new RuntimeException(Constants.LOGIN_INFO.WRONG);
         }
         H5SmsLoginForm request = JSON.parseObject(new String(Base64Utils.decodeFromString(data)), H5SmsLoginForm.class);
-        //校验验证码
+        // 校验验证码
         this.validateVerifyCode(request.getUuid(), request.getMobile(), request.getCode());
-        //查会员
+        // 查会员
         QueryWrapper<Member> qw = new QueryWrapper<>();
         qw.eq("phone_encrypted", AesCryptoUtils.encrypt(aesKey, request.getMobile()));
         Member member = memberMapper.selectOne(qw);
-        if (member == null){
-            //新会员，注册并登录
+        if (member == null) {
+            // 新会员，注册并登录
             member = new Member();
             member.setPhoneEncrypted(AesCryptoUtils.encrypt(aesKey, request.getMobile()));
             member.setPhoneHidden(PhoneUtils.hidePhone(request.getMobile()));
-            member.setNickname("用户" + request.getMobile().substring(7,11));
+            member.setNickname("用户" + request.getMobile().substring(7, 11));
             member.setStatus(Constants.MEMBER_ACCOUNT_STATUS.NORMAL);
             member.setGender(0);
             member.setCreateTime(optDate);
             int rows = memberMapper.insert(member);
-            if (rows < 1){
+            if (rows < 1) {
                 throw new RuntimeException("注册失败，请重试");
             }
             MemberWechat memberWechat = new MemberWechat();
             memberWechat.setMemberId(member.getId());
-            if (request.getAuthInfo() != null){
+            if (request.getAuthInfo() != null) {
                 memberWechat.setOpenid(request.getAuthInfo().getOpenid());
                 memberWechat.setAccessToken(request.getAuthInfo().getAccess_token());
                 memberWechat.setExpiresIn(request.getAuthInfo().getExpires_in());
                 memberWechat.setRefreshToken(request.getAuthInfo().getRefresh_token());
             }
-            if (StringUtils.isNotEmpty(request.getMpOpenId())){
+            if (StringUtils.isNotEmpty(request.getMpOpenId())) {
                 memberWechat.setRoutineOpenid(request.getMpOpenId());
             }
             memberWechat.setCreateTime(optDate);
             memberWechat.setCreateBy(member.getId());
             rows = memberWechatMapper.insert(memberWechat);
-            if (rows < 1){
+            if (rows < 1) {
                 throw new RuntimeException("注册失败，请重试");
             }
-        }else {
-            //校验会员状态
+        } else {
+            // 校验会员状态
             validateMemberStatus(member);
-            //判断小程序openid是否插入
-            if (StringUtils.isNotEmpty(request.getMpOpenId()) || request.getAuthInfo() != null){
+            // 判断小程序openid是否插入
+            if (StringUtils.isNotEmpty(request.getMpOpenId()) || request.getAuthInfo() != null) {
                 QueryWrapper<MemberWechat> queryWrapper = new QueryWrapper();
-                queryWrapper.eq("member_id",member.getId());
+                queryWrapper.eq("member_id", member.getId());
                 MemberWechat memberWechat = memberWechatMapper.selectOne(queryWrapper);
                 Boolean update = false;
-                if (StringUtils.isNotEmpty(request.getMpOpenId()) && StringUtils.isEmpty(memberWechat.getRoutineOpenid())) {
+                if (StringUtils.isNotEmpty(request.getMpOpenId())
+                        && StringUtils.isEmpty(memberWechat.getRoutineOpenid())) {
                     memberWechat.setRoutineOpenid(request.getMpOpenId());
                     update = true;
                 }
@@ -223,7 +232,7 @@ public class H5MemberService {
                     memberWechat.setRefreshToken(request.getAuthInfo().getRefresh_token());
                     update = true;
                 }
-                if (update){
+                if (update) {
                     memberWechatMapper.updateById(memberWechat);
                 }
             }
@@ -234,42 +243,48 @@ public class H5MemberService {
 
     /**
      * 校验会员状态
+     * 
      * @param member 会员信息
      */
     private void validateMemberStatus(Member member) {
-        if (Constants.MEMBER_ACCOUNT_STATUS.FORBIDDEN == member.getStatus()){
+        if (Constants.MEMBER_ACCOUNT_STATUS.FORBIDDEN == member.getStatus()) {
             throw new RuntimeException(Constants.LOGIN_INFO.FORBIDDEN);
         }
     }
 
     /**
      * 校验验证码有效性
-     * @param uuid 唯一标识
-     * @param phone 手机号
+     * 
+     * @param uuid      唯一标识
+     * @param phone     手机号
      * @param inputCode 输入的验证码
      */
-    private void validateVerifyCode(String uuid, String phone, String inputCode){
-        String key = uuid + "_" + phone;
-        String redisCode = redisCache.getCacheObject(key);
-        if (redisCode ==  null){
-            throw new RuntimeException(Constants.VERIFY_CODE_INFO.EXPIRED);
-        }else if (!redisCode.equals(inputCode)){
-            throw new RuntimeException(Constants.VERIFY_CODE_INFO.WRONG);
+    private void validateVerifyCode(String uuid, String phone, String inputCode) {
+        // @todo 验证码校验 如果是1122则不校验，生产环境要去掉 lsiten
+        if (!inputCode.equals("1122")) {
+            String key = uuid + "_" + phone;
+            String redisCode = redisCache.getCacheObject(key);
+            if (redisCode == null) {
+                throw new RuntimeException(Constants.VERIFY_CODE_INFO.EXPIRED);
+            } else if (!redisCode.equals(inputCode)) {
+                throw new RuntimeException(Constants.VERIFY_CODE_INFO.WRONG);
+            }
+            // 删除缓存
+            redisCache.deleteObject(key);
         }
-        //删除缓存
-        redisCache.deleteObject(key);
     }
 
     /**
      * 封装登录响应
+     * 
      * @param memberId 登录会员id
      * @return 结果
      */
-    public H5LoginVO getLoginResponse(Long memberId){
+    public H5LoginVO getLoginResponse(Long memberId) {
         LoginMember loginMember = new LoginMember();
         loginMember.setMemberId(memberId);
         String token = tokenService.createMemberToken(loginMember);
-        //record登录
+        // record登录
         this.insert(memberId);
         H5LoginVO response = new H5LoginVO();
         response.setToken(token);
@@ -291,11 +306,11 @@ public class H5MemberService {
     public WechatUserAuth getWechatUserAuth(String data) {
         BindOpenIDForm request = JSON.parseObject(new String(Base64Utils.decodeFromString(data)), BindOpenIDForm.class);
         WechatUserAuth userToken = wechatAuthService.getUserToken(request.getCode());
-        if (userToken == null){
+        if (userToken == null) {
             log.error("微信授权失败");
             throw new RuntimeException("授权失败，请重试");
         }
-        //判断openid是否存在
+        // 判断openid是否存在
         QueryWrapper<MemberWechat> qw = new QueryWrapper<>();
         qw.eq("openid", userToken.getOpenid());
         MemberWechat memberWechat = memberWechatMapper.selectOne(qw);
@@ -308,7 +323,8 @@ public class H5MemberService {
     }
 
     public void setWechatInfo(String data) {
-        WechatUserAuth authInfo = JSON.parseObject(new String(Base64Utils.decodeFromString(data)), WechatUserAuth.class);
+        WechatUserAuth authInfo = JSON.parseObject(new String(Base64Utils.decodeFromString(data)),
+                WechatUserAuth.class);
         Member member = (Member) LocalDataUtil.getVar(Constants.MEMBER_INFO);
         UpdateWrapper<MemberWechat> wrapper = new UpdateWrapper<>();
         wrapper.eq("member_id", member.getId());
@@ -344,31 +360,31 @@ public class H5MemberService {
     public H5LoginVO wechatLogin(WechatLoginVO params) throws Exception {
         String openId = params.getOpenId();
         String sessionKey = params.getSessionKey();
-        //解密手机号
+        // 解密手机号
         String mobile = getMobile(sessionKey, params.getKey(), params.getData());
-        if(StringUtils.isEmpty(mobile)) {
+        if (StringUtils.isEmpty(mobile)) {
             throw new Exception("登录异常");
         }
-        Member member = createOrUpdateMember(openId,mobile);
+        Member member = createOrUpdateMember(openId, mobile);
         return getLoginResponse(member.getId());
     }
 
-    private Member createOrUpdateMember(String openId,String mobile){
-        //查会员
+    private Member createOrUpdateMember(String openId, String mobile) {
+        // 查会员
         QueryWrapper<Member> qw = new QueryWrapper<>();
         qw.eq("phone_encrypted", AesCryptoUtils.encrypt(aesKey, mobile));
         Member member = memberMapper.selectOne(qw);
-        if (member == null){
-            //新会员，注册并登录
+        if (member == null) {
+            // 新会员，注册并登录
             member = new Member();
             member.setPhoneEncrypted(AesCryptoUtils.encrypt(aesKey, mobile));
             member.setPhoneHidden(PhoneUtils.hidePhone(mobile));
-            member.setNickname("用户" + mobile.substring(7,11));
+            member.setNickname("用户" + mobile.substring(7, 11));
             member.setStatus(Constants.MEMBER_ACCOUNT_STATUS.NORMAL);
             member.setGender(0);
             member.setCreateTime(LocalDateTime.now());
             int rows = memberMapper.insert(member);
-            if (rows < 1){
+            if (rows < 1) {
                 throw new RuntimeException("注册失败，请重试");
             }
             MemberWechat memberWechat = new MemberWechat();
@@ -377,7 +393,7 @@ public class H5MemberService {
             memberWechat.setCreateTime(LocalDateTime.now());
             memberWechat.setCreateBy(member.getId());
             rows = memberWechatMapper.insert(memberWechat);
-            if (rows < 1){
+            if (rows < 1) {
                 throw new RuntimeException("注册失败，请重试");
             }
         } else {
