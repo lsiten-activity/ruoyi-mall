@@ -4,6 +4,7 @@ name: spring boot项目部署
 
 # 定义全局环境变量
 environment:
+  # @todo 映射到外部的端口号需要改
   APP_PORT: 16160
 
 volumes:
