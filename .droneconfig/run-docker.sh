@@ -1,13 +1,4 @@
 #!/bin/sh
-###
- # @描述：
- # @作者：Eric.lei
- # @Date: 2024-05-18 12:23:11
- # @Github: https://github.com/lsiten
- # @签名：佛道双修青年
- # @FilePath: /ruoyi-mall/.droneconfig/run-docker.sh
- # @版权：Copyright (c) 2024 by Eric Lei email:1304906404@qq.com, All Rights Reserved.
-### 
 
 # 设置默认值为 "test" 的仓库名
 DRONE_REPO_NAME="${DRONE_REPO_NAME:-test}"
